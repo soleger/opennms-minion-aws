@@ -1,0 +1,4 @@
+KeyName: "jesse@noise"
+DiskType: "ephemeral"
+InstanceType: "m1.small"
+ClusterSize: 3
