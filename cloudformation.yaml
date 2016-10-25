@@ -36,12 +36,10 @@
       state: "present"
       region: "us-east-1"
       disable_rollback: true
-      template: "files/cloudformation-example.json"
+      template: "files/opennms.json"
       template_parameters:
         KeyName: "{{ KeyName }}"
-        DiskType: "{{ DiskType }}"
-        InstanceType: "{{ InstanceType }}"
-        ClusterSize: "{{ ClusterSize }}"
+        EC2InstanceType: "{{ EC2InstanceType }}"
       tags:
         Owner: "jesse"
         Env: "DEV"

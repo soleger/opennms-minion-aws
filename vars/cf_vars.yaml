@@ -1,4 +1,2 @@
 KeyName: "jesse@noise"
-DiskType: "ephemeral"
-InstanceType: "m1.small"
-ClusterSize: 3
+EC2InstanceType: "c4.large"
