@@ -439,8 +439,8 @@
             "CidrIp" : { "Fn::FindInMap" : [ "SubnetConfig", "Public", "CIDR" ]}
           }, {
             "IpProtocol" : "udp",
-            "FromPort" : "1161",
-            "ToPort" : "1161",
+            "FromPort" : "1514",
+            "ToPort" : "1514",
             "CidrIp" : { "Fn::FindInMap" : [ "SubnetConfig", "Public", "CIDR" ]}
           }, {
             "IpProtocol" : "tcp",

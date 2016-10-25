@@ -17,7 +17,7 @@ The repository contains an AWS CloudFormation stack and Ansible playbooks for se
 ## Other useful commands
 
     ansible-playbook -i ec2.py -vv cloudformation.yaml --tags "debug"
-    ansible -i ec2.py -u ec2-user tag_aws_cloudformation_stack_name_ansible_cloudformation -m ping
+    ansible -i ec2.py -u ec2-user tag_aws_cloudformation_stack_name_opennms_minion_lab -m ping
 
 ## References
 
