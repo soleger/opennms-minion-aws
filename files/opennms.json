@@ -323,13 +323,13 @@
       }
     },
 
-    "EC2Host" : {
+    "LoadGeneratorEC2Host" : {
       "Type" : "AWS::EC2::Instance",
       "DependsOn" : "GatewayToInternet",
       "Properties" : {
         "InstanceType" : { "Ref" : "EC2InstanceType" },
         "KeyName"  : { "Ref" : "KeyName" },
-        "ImageId"  : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" }, 
+        "ImageId"  : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
                          { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "EC2InstanceType" }, "Arch" ] } ] },
         "NetworkInterfaces" : [{
           "GroupSet"                 : [{ "Ref" : "EC2SecurityGroup" }],
@@ -337,11 +337,33 @@
           "DeviceIndex"              : "0",
           "DeleteOnTermination"      : "true",
           "SubnetId"                 : { "Ref" : "PublicSubnet" }
-        },
+        }],
         "Tags" : [{
           "Key": "MinionLabInstanceType",
           "Value": "loadgen"
-        }]]
+        }]
+      }
+    },
+
+    "UDPLoadBalancerEC2Host" : {
+      "Type" : "AWS::EC2::Instance",
+      "DependsOn" : "GatewayToInternet",
+      "Properties" : {
+        "InstanceType" : { "Ref" : "EC2InstanceType" },
+        "KeyName"  : { "Ref" : "KeyName" },
+        "ImageId"  : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
+                         { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "EC2InstanceType" }, "Arch" ] } ] },
+        "NetworkInterfaces" : [{
+          "GroupSet"                 : [{ "Ref" : "EC2SecurityGroup" }],
+          "AssociatePublicIpAddress" : "true",
+          "DeviceIndex"              : "0",
+          "DeleteOnTermination"      : "true",
+          "SubnetId"                 : { "Ref" : "PublicSubnet" }
+        }],
+        "Tags" : [{
+          "Key": "MinionLabInstanceType",
+          "Value": "loadbalancer"
+        }]
       }
     },
 
@@ -350,11 +372,21 @@
       "Properties" : {
         "GroupDescription" : "Enable access to the EC2 host",
         "VpcId" : { "Ref" : "VPC" },
-        "SecurityGroupIngress" : [ { 
+        "SecurityGroupIngress" : [ {
           "IpProtocol" : "tcp",
-          "FromPort" : "22",  
+          "FromPort" : "22",
           "ToPort" : "22",
           "CidrIp" : { "Ref" : "SSHLocation" }
+        }, {
+          "IpProtocol" : "udp",
+          "FromPort" : "1262",
+          "ToPort" : "1262",
+          "CidrIp" : { "Fn::FindInMap" : [ "SubnetConfig", "Public", "CIDR" ] }
+        }, {
+          "IpProtocol" : "udp",
+          "FromPort" : "1161",
+          "ToPort" : "1161",
+          "CidrIp" : { "Fn::FindInMap" : [ "SubnetConfig", "Public", "CIDR" ] }
         } ]
       }
     }
@@ -371,7 +403,7 @@
     },
     "DNSName" : {
       "Description" : "DNS Name of the EC2 host",
-      "Value" :  { "Fn::GetAtt" : ["EC2Host", "PublicDnsName"] }
+      "Value" :  { "Fn::GetAtt" : ["LoadGeneratorEC2Host", "PublicDnsName"] }
     }
   }
 }
