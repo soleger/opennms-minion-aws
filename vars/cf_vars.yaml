@@ -1,2 +1,3 @@
 KeyName: "jesse@noise"
 EC2InstanceType: "c4.large"
+MinionCount: 2
