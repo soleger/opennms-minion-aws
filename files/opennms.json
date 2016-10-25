@@ -373,6 +373,50 @@
         }
       },
 
+      "PostgreSQLEC2Host" : {
+        "Type" : "AWS::EC2::Instance",
+        "DependsOn" : "GatewayToInternet",
+        "Properties" : {
+          "InstanceType" : { "Ref" : "EC2InstanceType" },
+          "KeyName"  : { "Ref" : "KeyName" },
+          "ImageId"  : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
+                           { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "EC2InstanceType" }, "Arch" ] } ] },
+          "NetworkInterfaces" : [{
+            "GroupSet"                 : [{ "Ref" : "EC2SecurityGroup" }],
+            "AssociatePublicIpAddress" : "true",
+            "DeviceIndex"              : "0",
+            "DeleteOnTermination"      : "true",
+            "SubnetId"                 : { "Ref" : "PublicSubnet" }
+          }],
+          "Tags" : [{
+            "Key": "MinionLabInstanceType",
+            "Value": "postgres"
+          }]
+        }
+      },
+
+      "OpenNMSEC2Host" : {
+        "Type" : "AWS::EC2::Instance",
+        "DependsOn" : "GatewayToInternet",
+        "Properties" : {
+          "InstanceType" : { "Ref" : "EC2InstanceType" },
+          "KeyName"  : { "Ref" : "KeyName" },
+          "ImageId"  : { "Fn::FindInMap" : [ "AWSRegionArch2AMI", { "Ref" : "AWS::Region" },
+                           { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "EC2InstanceType" }, "Arch" ] } ] },
+          "NetworkInterfaces" : [{
+            "GroupSet"                 : [{ "Ref" : "EC2SecurityGroup" }],
+            "AssociatePublicIpAddress" : "true",
+            "DeviceIndex"              : "0",
+            "DeleteOnTermination"      : "true",
+            "SubnetId"                 : { "Ref" : "PublicSubnet" }
+          }],
+          "Tags" : [{
+            "Key": "MinionLabInstanceType",
+            "Value": "opennms"
+          }]
+        }
+      },
+
       "EC2SecurityGroup" : {
         "Type" : "AWS::EC2::SecurityGroup",
         "Properties" : {
@@ -384,6 +428,11 @@
             "ToPort" : "22",
             "CidrIp" : { "Ref" : "SSHLocation" }
           }, {
+            "IpProtocol" : "tcp",
+            "FromPort" : "8980",
+            "ToPort" : "8980",
+            "CidrIp" : { "Ref" : "SSHLocation" }
+          }, {
             "IpProtocol" : "udp",
             "FromPort" : "1262",
             "ToPort" : "1262",
@@ -392,6 +441,16 @@
             "IpProtocol" : "udp",
             "FromPort" : "1161",
             "ToPort" : "1161",
+            "CidrIp" : { "Fn::FindInMap" : [ "SubnetConfig", "Public", "CIDR" ]}
+          }, {
+            "IpProtocol" : "tcp",
+            "FromPort" : "5432",
+            "ToPort" : "5432",
+            "CidrIp" : { "Fn::FindInMap" : [ "SubnetConfig", "Public", "CIDR" ]}
+          }, {
+            "IpProtocol" : "tcp",
+            "FromPort" : "61616",
+            "ToPort" : "61616",
             "CidrIp" : { "Fn::FindInMap" : [ "SubnetConfig", "Public", "CIDR" ]}
           } ]
         }
