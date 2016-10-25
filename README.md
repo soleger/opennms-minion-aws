@@ -1,13 +1,17 @@
 
 ## Setup
 
-    ansible-playbook -vv cloudformation.yaml --tags "setup"
-    ansible -i ec2.py -u ubuntu tag_Name_vpn_gateway -m ping
-
+    ansible-playbook -vv cloudformation.yaml --tags "provision"
+    ansible-playbook -i ec2.py -vv cloudformation.yaml --tags "setup"
 
 ## Teardown
 
     ansible-playbook -vv cloudformation.yaml --tags "destroy"
+
+## Other useful commands
+
+
+    ansible -i ec2.py -u ec2-user tag_aws_cloudformation_stack_name_ansible_cloudformation -m ping
 
 
 ## References

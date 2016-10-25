@@ -337,7 +337,11 @@
           "DeviceIndex"              : "0",
           "DeleteOnTermination"      : "true",
           "SubnetId"                 : { "Ref" : "PublicSubnet" }
-        }]
+        },
+        "Tags" : [{
+          "Key": "MinionLabInstanceType",
+          "Value": "loadgen"
+        }]]
       }
     },
 
