@@ -1,3 +1,8 @@
+# OpenNMS Minion Lab on AWS
+
+## Overview
+
+The repository contains an AWS CloudFormation stack and Ansible playbooks for setting up the stack and configuring the EC2 instances.
 
 ## Setup
 
@@ -11,9 +16,8 @@
 
 ## Other useful commands
 
-
+    ansible-playbook -i ec2.py -vv cloudformation.yaml --tags "debug"
     ansible -i ec2.py -u ec2-user tag_aws_cloudformation_stack_name_ansible_cloudformation -m ping
-
 
 ## References
 
