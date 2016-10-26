@@ -434,8 +434,8 @@
             "CidrIp" : { "Ref" : "SSHLocation" }
           }, {
             "IpProtocol" : "udp",
-            "FromPort" : "1262",
-            "ToPort" : "1262",
+            "FromPort" : "1162",
+            "ToPort" : "1162",
             "CidrIp" : { "Fn::FindInMap" : [ "SubnetConfig", "Public", "CIDR" ]}
           }, {
             "IpProtocol" : "udp",
