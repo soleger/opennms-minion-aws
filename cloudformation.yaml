@@ -39,7 +39,7 @@
 
 
 - name: common setup
-  hosts: tag_aws_cloudformation_stack_name_ansible_cloudformation
+  hosts: tag_aws_cloudformation_stack_name_opennms_minion_lab
   remote_user: ec2-user
   tasks:
   - name: upgrade all packages
