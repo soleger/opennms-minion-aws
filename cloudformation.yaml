@@ -52,6 +52,7 @@
     yum: pkg={{item}} state=latest
     with_items:
      - net-snmp
+     - net-snmp-libs
      - net-snmp-utils
      - net-snmp-devel
      - cmake
@@ -257,6 +258,44 @@
      - opennms
   - name: configure opennms (opennms-activemq.xml)
     template: src=files/opennms-activemq.xml dest=/opt/opennms/etc/opennms-activemq.xml owner=root group=root mode=0644
+    become: yes
+    become_user: root
+    tags:
+     - setup
+     - opennms
+  - name: configure opennms (syslogd-configuration.xml)
+    template: src=files/syslogd-configuration.xml dest=/opt/opennms/etc/syslogd-configuration.xml owner=root group=root mode=0644
+    become: yes
+    become_user: root
+    tags:
+     - setup
+     - opennms
+  - name: configure opennms (syslog/Cisco.syslog.xml)
+    template: src=files/syslog/Cisco.syslog.xml dest=/opt/opennms/etc/syslog/Cisco.syslog.xml owner=root group=root mode=0644
+    become: yes
+    become_user: root
+    tags:
+     - setup
+     - opennms
+  - name: configure opennms (eventconf.xml)
+    template: src=files/eventconf.xml dest=/opt/opennms/etc/eventconf.xml owner=root group=root mode=0644
+    become: yes
+    become_user: root
+    tags:
+     - setup
+     - opennms
+  - name: configure opennms (events/Cisco.syslog.events.xml)
+    template: src=files/events/Cisco.syslog.events.xml dest=/opt/opennms/etc/events/Cisco.syslog.events.xml owner=root group=root mode=0644
+    become: yes
+    become_user: root
+    tags:
+     - setup
+     - opennms
+  - name: fix for installing syslog and trapd features
+    get_url:
+      url: https://www.opennms.org/~jesse/install-handler.jar
+      dest: /opt/opennms/lib/install-handler.jar
+      mode: 0644
     become: yes
     become_user: root
     tags:
