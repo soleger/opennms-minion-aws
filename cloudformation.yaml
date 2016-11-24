@@ -195,14 +195,14 @@
     tags:
      - debug
   - name: install openms yum repository rpm
-    yum: name=http://yum.opennms.org/repofiles/opennms-repo-bleeding-rhel6.noarch.rpm state=present
+    yum: name=https://yum.opennms.org/repofiles/opennms-repo-branches-release-19.0.0-rhel6.noarch.rpm state=present
     become: yes
     become_user: root
     tags:
      - setup
      - opennms
   - name: install opennms gpg key
-    rpm_key: state=present key=http://yum.opennms.org/OPENNMS-GPG-KEY
+    rpm_key: state=present key=https://yum.opennms.org/OPENNMS-GPG-KEY
     become: yes
     become_user: root
     tags:
@@ -286,16 +286,6 @@
      - opennms
   - name: configure opennms (events/Cisco.syslog.events.xml)
     template: src=files/events/Cisco.syslog.events.xml dest=/opt/opennms/etc/events/Cisco.syslog.events.xml owner=root group=root mode=0644
-    become: yes
-    become_user: root
-    tags:
-     - setup
-     - opennms
-  - name: fix for installing syslog and trapd features
-    get_url:
-      url: https://www.opennms.org/~jesse/install-handler.jar
-      dest: /opt/opennms/lib/install-handler.jar
-      mode: 0644
     become: yes
     become_user: root
     tags:
