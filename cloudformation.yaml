@@ -67,7 +67,8 @@
      - setup
   - name: download nmon
     get_url:
-      url: http://sourceforge.net/projects/nmon/files/nmon16e_mpginc.tar.gz
+      url: https://heanet.dl.sourceforge.net/project/nmon/nmon16e_mpginc.tar.gz
+      timeout: 30
       dest: /opt/nmon16e_mpginc.tar.gz
       mode: 0755
     become: yes
@@ -87,7 +88,7 @@
     tags:
      - setup
   - name: copy nmon
-    copy: src=/opt/nmon/nmon_x86_64_centos7 dest=/usr/bin/nmon
+    copy: remote_src=true src=/opt/nmon/nmon_x86_64_centos7 dest=/usr/bin/nmon mode=755
     become: yes
     become_user: root
     tags:
@@ -105,15 +106,19 @@
      - debug
   - name: download udpgen
     get_url:
-      url: https://github.com/j-white/opennms-events-stress-tools/releases/download/2016.12.11/udpgen.centos7
+      url: https://github.com/j-white/opennms-events-stress-tools/releases/download/2016.12.12/udpgen.centos7
       dest: /usr/bin/udpgen
       mode: 0755
     become: yes
     become_user: root
     tags:
      - setup
-  - name: copy start script
-    template: src=files/start-udpgen.sh dest=/home/ec2-user/start-udpgen.sh owner=ec2-user group=ec2-user mode=0755
+  - name: copy start script (lbs)
+    template: src=files/start-udpgen-to-lbs.sh dest=/home/ec2-user/start-udpgen-to-lbs.sh owner=ec2-user group=ec2-user mode=0755
+    tags:
+     - setup
+  - name: copy start script (minions)
+    template: src=files/start-udpgen-to-minions.sh dest=/home/ec2-user/start-udpgen-to-minions.sh owner=ec2-user group=ec2-user mode=0755
     tags:
      - setup
   - name: copy stop script
@@ -272,14 +277,14 @@
      - setup
      - opennms
   - name: delete hawtio slf4j api
-    file: path=/opt/opennms/hawtio/jetty-webapps/hawtio/WEB-INF/lib/slf4j-api-1.7.21.jar state=absent
+    file: path=/opt/opennms/jetty-webapps/hawtio/WEB-INF/lib/slf4j-api-1.7.21.jar state=absent
     become: yes
     become_user: root
     tags:
      - setup
      - opennms
   - name: delete hawtio slf4j log4j2 impl
-    file: path=/opt/opennms/hawtio/jetty-webapps/hawtio/WEB-INF/lib/slf4j-log4j12-1.7.21.jar state=absent
+    file: path=/opt/opennms/jetty-webapps/hawtio/WEB-INF/lib/slf4j-log4j12-1.7.21.jar state=absent
     become: yes
     become_user: root
     tags:
@@ -287,6 +292,13 @@
      - opennms
   - name: configure opennms (opennms.conf)
     template: src=files/opennms.conf dest=/opt/opennms/etc/opennms.conf owner=root group=root mode=0644
+    become: yes
+    become_user: root
+    tags:
+     - setup
+     - opennms
+  - name: configure opennms (log4j2.xml)
+    template: src=files/log4j2.xml dest=/opt/opennms/etc/log4j2.xml owner=root group=root mode=0644
     become: yes
     become_user: root
     tags:
