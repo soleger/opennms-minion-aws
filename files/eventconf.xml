@@ -16,6 +16,7 @@
   <event-file>events/Rancid.events.xml</event-file>
   <event-file>events/AlarmChangeNotifierEvents.xml</event-file>
   
+<!--
   <event-file>events/3Com.events.xml</event-file>
   <event-file>events/AdaptecRaid.events.xml</event-file>
   <event-file>events/ADIC-v2.events.xml</event-file>
@@ -222,7 +223,9 @@
   <event-file>events/Sudo.syslog.events.xml</event-file>
   <event-file>events/SunILOM.events.xml</event-file>
   <event-file>events/Symbol.events.xml</event-file>
+-->
   <event-file>events/Syslogd.events.xml</event-file>
+<!--
   <event-file>events/SystemEdge.events.xml</event-file>
   <event-file>events/SwissQual.events.xml</event-file>
   <event-file>events/TransPath.events.xml</event-file>
@@ -242,6 +245,7 @@
   <event-file>events/Websense.events.xml</event-file>
   <event-file>events/Xerox-V2.events.xml</event-file>
   <event-file>events/Xerox.events.xml</event-file>
+-->
   <event-file>events/Cisco.syslog.events.xml</event-file>
   
   <event-file>events/topology-status.events.xml</event-file>

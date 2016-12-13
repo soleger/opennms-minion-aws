@@ -105,7 +105,7 @@
      - debug
   - name: download udpgen
     get_url:
-      url: https://github.com/j-white/opennms-events-stress-tools/releases/download/2015.10.25/udpgen.centos7
+      url: https://github.com/j-white/opennms-events-stress-tools/releases/download/2016.12.11/udpgen.centos7
       dest: /usr/bin/udpgen
       mode: 0755
     become: yes
@@ -218,6 +218,7 @@
   remote_user: ec2-user
   vars_files:
     - "vars/cf_vars.yaml"
+  tasks:
   - name: debug
     debug: msg="OpenNMS @ {{ inventory_hostname }}"
     tags:
@@ -298,6 +299,13 @@
     tags:
      - setup
      - opennms
+  - name: configure opennms (service-configuration.xml)
+    template: src=files/service-configuration.xml dest=/opt/opennms/etc/service-configuration.xml owner=root group=root mode=0644
+    become: yes
+    become_user: root
+    tags:
+     - setup
+     - opennms
   - name: configure opennms (opennms-activemq.xml)
     template: src=files/opennms-activemq.xml dest=/opt/opennms/etc/opennms-activemq.xml owner=root group=root mode=0644
     become: yes
@@ -360,9 +368,9 @@
 
 - name: minion setup
   hosts: tag_MinionLabInstanceType_minion
-  remote_user: ec2-user
   vars_files:
     - "vars/cf_vars.yaml"
+  remote_user: ec2-user
   tasks:
   - name: debug
     debug: msg="Minion @ {{ inventory_hostname }}"
