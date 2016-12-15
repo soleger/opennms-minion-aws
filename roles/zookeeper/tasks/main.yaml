@@ -1,0 +1,84 @@
+---
+- name: debug
+  debug: msg="Zookeeper @ {{ inventory_hostname }}"
+  tags:
+    - debug
+    - zookeeper
+- name: download oracle java
+  get_url:
+    url: http://download.oracle.com/otn-pub/java/jdk/8u112-b15/jdk-8u112-linux-x64.rpm
+    dest: /tmp/jdk-linux-x64.rpm
+    headers: 'Cookie: oraclelicense=accept-securebackup-cookie'
+  tags:
+    - setup
+    - zookeeper
+- name: install oracle java
+  yum:
+    name: /tmp/jdk-linux-x64.rpm
+    state: present
+  become: yes
+  tags:
+    - setup
+    - zookeeper
+- name: create zookeeper group
+  group:
+    name: zookeeper
+  become: yes
+  tags:
+    - setup
+    - zookeeper
+- name: create zookeeper user
+  user:
+    name: zookeeper
+    comment: "Service user for zookeeper"
+    group: zookeeper
+  become: yes
+  tags:
+    - setup
+    - zookeeper
+- name: mkdir zookeeper
+  file: path=/opt/zookeeper state=directory owner=zookeeper group=zookeeper
+  become: yes
+  tags:
+    - setup
+    - zookeeper
+- name: mkdir zookeeper working directory
+  file: path=/var/lib/zookeeper state=directory owner=zookeeper group=zookeeper
+  become: yes
+  tags:
+    - setup
+    - zookeeper
+- name: install zookeeper
+  unarchive: src=http://ftp-stud.hs-esslingen.de/pub/Mirrors/ftp.apache.org/dist/zookeeper/zookeeper-3.4.9/zookeeper-3.4.9.tar.gz dest=/opt/zookeeper creates=/opt/zookeeper/zookeeper-3.4.9.jar remote_src=yes extra_opts="--strip-components=1" owner=zookeeper group=zookeeper
+  become: yes
+  tags:
+    - setup
+    - zookeeper
+- name: Create zookeeper configuration
+  template: src=zoo.conf.tpl dest=/opt/zookeeper/conf/zoo.cfg mode=0644 owner=zookeeper group=zookeeper
+  become: yes
+  tags:
+    - setup
+    - zookeeper
+- name: Copy zookeeper service wrapper
+  copy: src=zookeeper.init dest=/etc/init.d/zookeeper mode=0755
+  become: yes
+  become_user: root
+  tags:
+    - setup
+    - zookeeper
+- name: register zookeeper as system service
+  command: chkconfig --add zookeeper
+  become: yes
+  tags:
+    - setup
+    - zookeeper
+- name: Enable and start zookeeper service
+  service:
+    name: zookeeper
+    state: started
+    enabled: yes
+  become: yes
+  tags:
+    - setup
+    - zookeeper

@@ -1,0 +1,26 @@
+---
+- name: debug
+  debug: msg="Load Generator @ {{ inventory_hostname }}"
+  tags:
+   - debug
+- name: download udpgen
+  get_url:
+    url: https://github.com/j-white/opennms-events-stress-tools/releases/download/2016.12.12/udpgen.centos7
+    dest: /usr/bin/udpgen
+    mode: 0755
+  become: yes
+  become_user: root
+  tags:
+   - setup
+- name: copy start script (lbs)
+  template: src=start-udpgen-to-lbs.sh dest=/home/ec2-user/start-udpgen-to-lbs.sh owner=ec2-user group=ec2-user mode=0755
+  tags:
+   - setup
+- name: copy start script (minions)
+  template: src=start-udpgen-to-minions.sh dest=/home/ec2-user/start-udpgen-to-minions.sh owner=ec2-user group=ec2-user mode=0755
+  tags:
+   - setup
+- name: copy stop script
+  template: src=stop-udpgen.sh dest=/home/ec2-user/stop-udpgen.sh owner=ec2-user group=ec2-user mode=0755
+  tags:
+   - setup

@@ -11,11 +11,13 @@
       state: "present"
       region: "us-east-1"
       disable_rollback: true
-      template: "files/opennms.json"
+      template: "opennms.json"
       template_parameters:
         KeyName: "{{ KeyName }}"
         EC2InstanceType: "{{ EC2InstanceType }}"
         MinionCount: "{{ MinionCount }}"
+        KafkaCount: "{{ KafkaCount }}"
+        ElasticCount: "{{ ElasticCount }}"
       tags:
         Owner: "jesse"
         Env: "DEV"
@@ -35,396 +37,39 @@
     tags:
      - destroy
 
+- hosts: tag_aws_cloudformation_stack_name_opennms_minion_lab
+  roles:
+    - common
+
+- hosts: tag_MinionLabInstanceType_elastic
+  roles:
+    - elasticsearch
 
 
+- hosts: tag_MinionLabInstanceType_zookeeper
+  roles:
+    - zookeeper
 
-- name: common setup
-  hosts: tag_aws_cloudformation_stack_name_opennms_minion_lab
-  remote_user: ec2-user
-  tasks:
-  - name: upgrade all packages
-    yum: name=* state=latest
-    become: yes
-    become_user: root
-    tags:
-     - setup
-  - name: install tools
-    yum: pkg={{item}} state=latest
-    with_items:
-     - net-snmp
-     - net-snmp-libs
-     - net-snmp-utils
-     - net-snmp-devel
-     - cmake
-     - gcc
-     - git
-     - gcc-c++
-     - tcpdump
-     - telnet
-    become: yes
-    become_user: root
-    tags:
-     - setup
-  - name: download nmon
-    get_url:
-      url: https://heanet.dl.sourceforge.net/project/nmon/nmon16e_mpginc.tar.gz
-      timeout: 30
-      dest: /opt/nmon16e_mpginc.tar.gz
-      mode: 0755
-    become: yes
-    become_user: root
-    tags:
-     - setup
-  - name: mkdir nmon
-    file: path=/opt/nmon state=directory owner=root group=root mode=0755
-    become: yes
-    become_user: root
-    tags:
-     - setup
-  - name: extract nmon
-    unarchive: src=/opt/nmon16e_mpginc.tar.gz  dest=/opt/nmon creates=/opt/nmon/nmon_x86_64_centos7 copy=no
-    become: yes
-    become_user: root
-    tags:
-     - setup
-  - name: copy nmon
-    copy: remote_src=true src=/opt/nmon/nmon_x86_64_centos7 dest=/usr/bin/nmon mode=755
-    become: yes
-    become_user: root
-    tags:
-     - setup
+- hosts: tag_MinionLabInstanceType_kafka
+  roles:
+    - kafka
 
+- hosts: tag_MinionLabInstanceType_postgres
+  roles:
+    - postgres
 
+- hosts: tag_MinionLabInstanceType_opennms
+  roles:
+    - opennms
 
-- name: load generator setup
-  hosts: tag_MinionLabInstanceType_loadgen
-  remote_user: ec2-user
-  tasks:
-  - name: debug
-    debug: msg="Load Generator @ {{ inventory_hostname }}"
-    tags:
-     - debug
-  - name: download udpgen
-    get_url:
-      url: https://github.com/j-white/opennms-events-stress-tools/releases/download/2016.12.12/udpgen.centos7
-      dest: /usr/bin/udpgen
-      mode: 0755
-    become: yes
-    become_user: root
-    tags:
-     - setup
-  - name: copy start script (lbs)
-    template: src=files/start-udpgen-to-lbs.sh dest=/home/ec2-user/start-udpgen-to-lbs.sh owner=ec2-user group=ec2-user mode=0755
-    tags:
-     - setup
-  - name: copy start script (minions)
-    template: src=files/start-udpgen-to-minions.sh dest=/home/ec2-user/start-udpgen-to-minions.sh owner=ec2-user group=ec2-user mode=0755
-    tags:
-     - setup
-  - name: copy stop script
-    template: src=files/stop-udpgen.sh dest=/home/ec2-user/stop-udpgen.sh owner=ec2-user group=ec2-user mode=0755
-    tags:
-     - setup
+- hosts: tag_MinionLabInstanceType_minion
+  roles:
+    - minion
 
+- hosts: tag_MinionLabInstanceType_loadgen
+  roles:
+    - load-generator
 
-
-
-
-
-
-- name: load balancer setup
-  hosts: tag_MinionLabInstanceType_loadbalancer
-  remote_user: ec2-user
-  tasks:
-  - name: debug
-    debug: msg="Load Balancer @ {{ inventory_hostname }}"
-    tags:
-     - debug
-  - name: install nginx
-    yum: pkg={{item}} state=latest
-    with_items:
-     - nginx
-     - nginx-mod-stream
-    become: yes
-    become_user: root
-    tags:
-     - setup
-  - name: configure nginx
-    template: src=files/nginx.conf dest=/etc/nginx/nginx.conf owner=root group=root mode=0644
-    become: yes
-    become_user: root
-    tags:
-     - setup
-  - name: enable and start nginx
-    service: name=nginx enabled=yes state=started
-    become: yes
-    become_user: root
-    tags:
-     - setup
-
-
-
-
-- name: postgres setup
-  hosts: tag_MinionLabInstanceType_postgres
-  remote_user: ec2-user
-  tasks:
-  - name: install postgres
-    yum: pkg={{item}} state=latest
-    with_items:
-     - postgresql95-server
-     - postgresql95-contrib
-    become: yes
-    become_user: root
-    tags:
-     - setup
-     - postgres
-  - stat: path=/var/lib/pgsql95/data/pg_xlog
-    become: yes
-    become_user: root
-    register: pgdata_xlog
-    tags:
-     - setup
-     - postgres
-  - command: "service postgresql95 initdb"
-    become: yes
-    become_user: root
-    when: pgdata_xlog.stat.exists == False
-    tags:
-     - setup
-     - postgres
-  - name: configure postgres (pg_hba.conf)
-    template: src=files/pg_hba.conf dest=/var/lib/pgsql95/data/pg_hba.conf owner=postgres group=postgres mode=0600
-    become: yes
-    become_user: root
-    tags:
-     - setup
-     - postgres
-  - name: configure postgres (postgresql.conf)
-    template: src=files/postgresql.conf dest=/var/lib/pgsql95/data/postgresql.conf owner=postgres group=postgres mode=0600
-    become: yes
-    become_user: root
-    tags:
-     - setup
-     - postgres
-  - name: enable and start postgres
-    service: name=postgresql95 enabled=yes state=started
-    become: yes
-    become_user: root
-    tags:
-     - setup
-     - postgres
-
-
-
-
-- name: opennms setup
-  hosts: tag_MinionLabInstanceType_opennms
-  remote_user: ec2-user
-  vars_files:
-    - "vars/cf_vars.yaml"
-  tasks:
-  - name: debug
-    debug: msg="OpenNMS @ {{ inventory_hostname }}"
-    tags:
-     - debug
-  - name: install openms yum repository rpm
-    yum: name=https://yum.opennms.org/repofiles/{{ OpenNMSRepoFile }} state=present
-    become: yes
-    become_user: root
-    tags:
-     - setup
-     - opennms
-  - name: install opennms gpg key
-    rpm_key: state=present key=https://yum.opennms.org/OPENNMS-GPG-KEY
-    become: yes
-    become_user: root
-    tags:
-     - setup
-     - opennms
-  - name: install opennms
-    yum: pkg={{item}} state=latest
-    with_items:
-     - opennms-core
-     - opennms-webapp-jetty
-    become: yes
-    become_user: root
-    tags:
-     - setup
-     - opennms
-  - name: download hawtio
-    get_url:
-      url: https://oss.sonatype.org/content/repositories/public/io/hawt/hawtio-default/1.4.67/hawtio-default-1.4.67.war
-      dest: /opt/opennms/etc/hawtio.war.zip
-      mode: 0755
-    become: yes
-    become_user: root
-    tags:
-     - setup
-     - opennms
-  - name: mkdir hawtio
-    file: path=/opt/opennms/jetty-webapps/hawtio state=directory owner=root group=root mode=0755
-    become: yes
-    become_user: root
-    tags:
-     - setup
-     - opennms
-  - name: extract hawtio
-    unarchive: src=/opt/opennms/etc/hawtio.war.zip dest=/opt/opennms/jetty-webapps/hawtio creates=/opt/opennms/jetty-webapps/hawtio/index.html copy=no
-    become: yes
-    become_user: root
-    tags:
-     - setup
-     - opennms
-  - name: delete hawtio slf4j api
-    file: path=/opt/opennms/jetty-webapps/hawtio/WEB-INF/lib/slf4j-api-1.7.21.jar state=absent
-    become: yes
-    become_user: root
-    tags:
-     - setup
-     - opennms
-  - name: delete hawtio slf4j log4j2 impl
-    file: path=/opt/opennms/jetty-webapps/hawtio/WEB-INF/lib/slf4j-log4j12-1.7.21.jar state=absent
-    become: yes
-    become_user: root
-    tags:
-     - setup
-     - opennms
-  - name: configure opennms (opennms.conf)
-    template: src=files/opennms.conf dest=/opt/opennms/etc/opennms.conf owner=root group=root mode=0644
-    become: yes
-    become_user: root
-    tags:
-     - setup
-     - opennms
-  - name: configure opennms (log4j2.xml)
-    template: src=files/log4j2.xml dest=/opt/opennms/etc/log4j2.xml owner=root group=root mode=0644
-    become: yes
-    become_user: root
-    tags:
-     - setup
-     - opennms
-  - name: configure opennms (opennms-datasources.xml)
-    template: src=files/opennms-datasources.xml dest=/opt/opennms/etc/opennms-datasources.xml owner=root group=root mode=0644
-    become: yes
-    become_user: root
-    tags:
-     - setup
-     - opennms
-  - name: configure opennms (service-configuration.xml)
-    template: src=files/service-configuration.xml dest=/opt/opennms/etc/service-configuration.xml owner=root group=root mode=0644
-    become: yes
-    become_user: root
-    tags:
-     - setup
-     - opennms
-  - name: configure opennms (opennms-activemq.xml)
-    template: src=files/opennms-activemq.xml dest=/opt/opennms/etc/opennms-activemq.xml owner=root group=root mode=0644
-    become: yes
-    become_user: root
-    tags:
-     - setup
-     - opennms
-  - name: configure opennms (syslogd-configuration.xml)
-    template: src=files/syslogd-configuration.xml dest=/opt/opennms/etc/syslogd-configuration.xml owner=root group=root mode=0644
-    become: yes
-    become_user: root
-    tags:
-     - setup
-     - opennms
-  - name: configure opennms (syslog/Cisco.syslog.xml)
-    template: src=files/syslog/Cisco.syslog.xml dest=/opt/opennms/etc/syslog/Cisco.syslog.xml owner=root group=root mode=0644
-    become: yes
-    become_user: root
-    tags:
-     - setup
-     - opennms
-  - name: configure opennms (eventconf.xml)
-    template: src=files/eventconf.xml dest=/opt/opennms/etc/eventconf.xml owner=root group=root mode=0644
-    become: yes
-    become_user: root
-    tags:
-     - setup
-     - opennms
-  - name: configure opennms (events/Cisco.syslog.events.xml)
-    template: src=files/events/Cisco.syslog.events.xml dest=/opt/opennms/etc/events/Cisco.syslog.events.xml owner=root group=root mode=0644
-    become: yes
-    become_user: root
-    tags:
-     - setup
-     - opennms
-  - stat: path=/opt/opennms/etc/opennms-upgrade-status.properties
-    become: yes
-    become_user: root
-    register: opennms_upgrade_status
-    tags:
-     - setup
-     - opennms
-  - command: "/opt/opennms/bin/install -dis"
-    become: yes
-    become_user: root
-    when: opennms_upgrade_status.stat.exists == False
-    tags:
-     - setup
-     - opennms
-  - name: enable and start opennms
-    service: name=opennms enabled=yes state=started
-    become: yes
-    become_user: root
-    tags:
-     - setup
-     - opennms
-
-
-
-
-- name: minion setup
-  hosts: tag_MinionLabInstanceType_minion
-  vars_files:
-    - "vars/cf_vars.yaml"
-  remote_user: ec2-user
-  tasks:
-  - name: debug
-    debug: msg="Minion @ {{ inventory_hostname }}"
-    tags:
-     - debug
-  - name: install openms yum repository rpm
-    yum: name=https://yum.opennms.org/repofiles/{{ OpenNMSRepoFile }} state=present
-    become: yes
-    become_user: root
-    tags:
-     - setup
-  - name: install opennms gpg key
-    rpm_key: state=present key=http://yum.opennms.org/OPENNMS-GPG-KEY
-    become: yes
-    become_user: root
-    tags:
-     - setup
-  - name: allow non-root icmp
-    sysctl: name="net.ipv4.ping_group_range" value="0 429496729" sysctl_set=yes state=present reload=yes
-    become: yes
-    become_user: root
-    tags:
-     - setup
-  - name: install opennms minion
-    yum: pkg={{item}} state=latest
-    with_items:
-     - opennms-minion
-    become: yes
-    become_user: root
-    tags:
-     - setup
-  - name: configure minion (org.opennms.minion.controller.cfg)
-    template: src=files/org.opennms.minion.controller.cfg dest=/opt/minion/etc/org.opennms.minion.controller.cfg owner=minion group=minion mode=0644
-    become: yes
-    become_user: root
-    tags:
-     - setup
-  - name: enable and start minion
-    service: name=minion enabled=yes state=started
-    become: yes
-    become_user: root
-    tags:
-     - setup
-
-
+- hosts: tag_MinionLabInstanceType_loadbalancer
+  roles:
+    - load-balancer

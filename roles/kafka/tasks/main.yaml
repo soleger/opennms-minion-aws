@@ -1,0 +1,46 @@
+---
+- name: debug
+  debug: msg="Kafka @ {{ inventory_hostname }}"
+  tags:
+   - debug
+   - kafka
+- name: mkdir kafka
+  file: path=/opt/kafka state=directory
+  become: yes
+  tags:
+    - setup
+    - kafka
+- name: download kafka
+  unarchive: src=http://ftp.halifax.rwth-aachen.de/apache/kafka/0.10.1.0/kafka_2.11-0.10.1.0.tgz dest=/opt/kafka remote_src=yes creates=/opt/kafka/libs/kafka_2.11-0.10.1.0.jar extra_opts="--strip-components=1"
+  become: yes
+  tags:
+    - setup
+    - kafka
+- name: Setup kafka server.properties
+  template: src=server.properties.tpl dest=/opt/kafka/config/server.properties mode=0644
+  become: yes
+  tags:
+   - setup
+   - kafka
+- name: Copy kafka service wrapper
+  copy: src=kafka.init dest=/etc/init.d/kafka mode=0755
+  become: yes
+  become_user: root
+  tags:
+    - setup
+    - kafka
+- name: register kafka as system service
+  command: chkconfig --add kafka
+  become: yes
+  tags:
+    - setup
+    - kafka
+- name: Enable and start kafka service
+  service:
+    name: kafka
+    state: started
+    enabled: yes
+  become: yes
+  tags:
+    - setup
+    - kafka

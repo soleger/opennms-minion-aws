@@ -1,0 +1,45 @@
+---
+- name: debug
+  debug: msg="Elasticsearch @ {{ inventory_hostname }}"
+  tags:
+   - debug
+   - elastic
+- name: install elasticsearch
+  yum: name=https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/rpm/elasticsearch/2.3.3/elasticsearch-2.3.3.rpm
+  become: yes
+  tags:
+   - setup
+   - elastic
+- name: install AWS cloud plugin
+  command: /usr/share/elasticsearch/bin/plugin install cloud-aws creates=/usr/share/elasticsearch/plugins/cloud-aws
+  become: yes
+  tags:
+    - setup
+    - elastic
+- name: configuration elasticsearch
+  template: src=elasticsearch.yml.tpl dest=/etc/elasticsearch/elasticsearch.yml mode=0644 owner=root group=elasticsearch
+  become: yes
+  tags:
+   - setup
+   - elastic
+- name: system configuration elasticsearch
+  template: src=elasticsearch.sysconfig.tpl dest=/etc/sysconfig/elasticsearch mode=644 owner=root group=root
+  become: yes
+  tags:
+    - setup
+    - elastic
+- name: register elastic as system service
+  command: chkconfig --add elasticsearch
+  become: yes
+  tags:
+    - setup
+    - elastic
+- name: Enable and start elasticsearch service
+  service:
+    name: elasticsearch
+    state: started
+    enabled: yes
+  become: yes
+  tags:
+    - setup
+    - elastic

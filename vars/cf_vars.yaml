@@ -1,4 +1,5 @@
 KeyName: "jesse@noise"
 EC2InstanceType: "c4.large"
 MinionCount: 2
-OpenNMSRepoFile: opennms-repo-branches-jira-HZN-966-rhel6.noarch.rpm
+KafkaCount: 1
+ElasticCount: 1

@@ -1,0 +1,50 @@
+---
+- name: debug
+  debug: msg="Minion @ {{ inventory_hostname }}"
+  tags:
+   - debug
+   - minion
+- name: install openms yum repository rpm
+  yum: name=https://yum.opennms.org/repofiles/{{ OpenNMSRepoFile }} state=present
+  become: yes
+  become_user: root
+  tags:
+   - setup
+   - minion
+- name: install opennms gpg key
+  rpm_key: state=present key=http://yum.opennms.org/OPENNMS-GPG-KEY
+  become: yes
+  become_user: root
+  tags:
+   - setup
+   - minion
+- name: allow non-root icmp
+  sysctl: name="net.ipv4.ping_group_range" value="0 429496729" sysctl_set=yes state=present reload=yes
+  become: yes
+  become_user: root
+  tags:
+   - setup
+   - minion
+- name: install opennms minion
+  yum: pkg={{item}} state=latest
+  with_items:
+   - opennms-minion
+  become: yes
+  become_user: root
+  tags:
+   - setup
+   - minion
+- name: configure minion (org.opennms.minion.controller.cfg)
+  template: src=org.opennms.minion.controller.cfg dest=/opt/minion/etc/org.opennms.minion.controller.cfg owner=minion group=minion mode=0644
+  become: yes
+  become_user: root
+  tags:
+   - setup
+   - minion
+- name: enable and start minion
+  service: name=minion enabled=yes state=started
+  become: yes
+  become_user: root
+  tags:
+   - setup
+   - minion

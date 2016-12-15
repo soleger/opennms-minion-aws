@@ -1,0 +1,11 @@
+#!/bin/bash -e
+#
+# /etc/init.d/zookeeper
+# 
+# ZooKeeper
+# 
+# chkconfig: 345 99 01
+# description: zookeeper start wrapper
+
+cd /opt/zookeeper/bin
+./zkServer.sh "$@"

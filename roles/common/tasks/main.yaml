@@ -1,0 +1,52 @@
+---
+- name: upgrade all packages
+  yum: name=* state=latest
+  become: yes
+  become_user: root
+  tags:
+   - setup
+- name: install tools
+  yum: pkg={{item}} state=latest
+  with_items:
+   - net-snmp
+   - net-snmp-libs
+   - net-snmp-utils
+   - net-snmp-devel
+   - cmake
+   - gcc
+   - git
+   - gcc-c++
+   - tcpdump
+   - telnet
+  become: yes
+  become_user: root
+  tags:
+   - setup
+- name: download nmon
+  get_url:
+    url: https://heanet.dl.sourceforge.net/project/nmon/nmon16e_mpginc.tar.gz
+    timeout: 30
+    dest: /opt/nmon16e_mpginc.tar.gz
+    mode: 0755
+  become: yes
+  become_user: root
+  tags:
+   - setup
+- name: mkdir nmon
+  file: path=/opt/nmon state=directory owner=root group=root mode=0755
+  become: yes
+  become_user: root
+  tags:
+   - setup
+- name: extract nmon
+  unarchive: src=/opt/nmon16e_mpginc.tar.gz  dest=/opt/nmon creates=/opt/nmon/nmon_x86_64_centos7 copy=no
+  become: yes
+  become_user: root
+  tags:
+   - setup
+- name: copy nmon
+  copy: remote_src=true src=/opt/nmon/nmon_x86_64_centos7 dest=/usr/bin/nmon mode=755
+  become: yes
+  become_user: root
+  tags:
+   - setup
