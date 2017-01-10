@@ -41,6 +41,27 @@
   tags:
    - setup
    - minion
+- name: enable hawtio (hawtio.boot)
+  template: src=hawtio.boot dest=/opt/minion/etc/featuresBoot.d/hawtio.boot owner=minion group=minion mode=0644
+  become: yes
+  become_user: root
+  tags:
+   - setup
+   - minion
+- name: optionally enable kafka (kafka.boot)
+  template: src=kafka.boot dest=/opt/minion/etc/featuresBoot.d/kafka.boot owner=minion group=minion mode=0644
+  become: yes
+  become_user: root
+  tags:
+   - setup
+   - minion
+- name: configure kafka (org.opennms.core.ipc.sink.kafka.cfg)
+  template: src=org.opennms.core.ipc.sink.kafka.cfg dest=/opt/minion/etc/org.opennms.core.ipc.sink.kafka.cfg owner=minion group=minion mode=0644
+  become: yes
+  become_user: root
+  tags:
+   - setup
+   - minion
 - name: enable and start minion
   service: name=minion enabled=yes state=started
   become: yes

@@ -128,6 +128,13 @@
   tags:
    - setup
    - opennms
+- name: configure opennms (opennms.properties.d/kafka.properties)
+  template: src=opennms.properties.d/kafka.properties dest=/opt/opennms/etc/opennms.properties.d/kafka.properties owner=root group=root mode=0644
+  become: yes
+  become_user: root
+  tags:
+   - setup
+   - opennms
 - stat: path=/opt/opennms/etc/opennms-upgrade-status.properties
   become: yes
   become_user: root
