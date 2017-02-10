@@ -191,6 +191,7 @@
           "CidrBlock" : { "Fn::FindInMap" : [ "SubnetConfig", "VPC", "CIDR" ]},
           "Tags" : [
             { "Key" : "Application", "Value" : { "Ref" : "AWS::StackName" } },
+            { "Key" : "Name", "Value" : { "Ref" : "AWS::StackName" } },
             { "Key" : "Network", "Value" : "Public" }
           ]
         }
@@ -203,6 +204,7 @@
           "CidrBlock" : { "Fn::FindInMap" : [ "SubnetConfig", "Public", "CIDR" ]},
           "Tags" : [
             { "Key" : "Application", "Value" : { "Ref" : "AWS::StackName" } },
+            { "Key" : "Name", "Value" : { "Ref" : "AWS::StackName" } },
             { "Key" : "Network", "Value" : "Public" }
           ]
         }
@@ -213,6 +215,7 @@
         "Properties" : {
           "Tags" : [
             { "Key" : "Application", "Value" : { "Ref" : "AWS::StackName" } },
+            { "Key" : "Name", "Value" : { "Ref" : "AWS::StackName" } },
             { "Key" : "Network", "Value" : "Public" }
           ]
         }
@@ -232,6 +235,7 @@
           "VpcId" : { "Ref" : "VPC" },
           "Tags" : [
             { "Key" : "Application", "Value" : { "Ref" : "AWS::StackName" } },
+            { "Key" : "Name", "Value" : { "Ref" : "AWS::StackName" } },
             { "Key" : "Network", "Value" : "Public" }
           ]
         }
@@ -261,6 +265,7 @@
           "VpcId" : { "Ref" : "VPC" },
           "Tags" : [
             { "Key" : "Application", "Value" : { "Ref" : "AWS::StackName" } },
+            { "Key" : "Name", "Value" : { "Ref" : "AWS::StackName" } },
             { "Key" : "Network", "Value" : "Public" }
           ]
         }
@@ -354,10 +359,10 @@
             "DeleteOnTermination"      : "true",
             "SubnetId"                 : { "Ref" : "PublicSubnet" }
           }],
-          "Tags" : [{
-            "Key": "MinionLabInstanceType",
-            "Value": "loadgen"
-          }]
+          "Tags" : [
+            { "Key" : "MinionLabInstanceType", "Value" : "loadgen" },
+            { "Key" : "Name", "Value" : "loadgen" }
+          ]
         }
       },
 
@@ -376,10 +381,10 @@
             "DeleteOnTermination"      : "true",
             "SubnetId"                 : { "Ref" : "PublicSubnet" }
           }],
-          "Tags" : [{
-            "Key": "MinionLabInstanceType",
-            "Value": "loadbalancer"
-          }]
+          "Tags" : [
+            { "Key" : "MinionLabInstanceType", "Value" : "loadbalancer" },
+            { "Key" : "Name", "Value" : "loadbalancer" }
+          ]
         }
       },
 
@@ -398,10 +403,10 @@
             "DeleteOnTermination"      : "true",
             "SubnetId"                 : { "Ref" : "PublicSubnet" }
           }],
-          "Tags" : [{
-            "Key": "MinionLabInstanceType",
-            "Value": "postgres"
-          }]
+          "Tags" : [
+            { "Key" : "MinionLabInstanceType", "Value" : "postgres" },
+            { "Key" : "Name", "Value" : "postgres" }
+          ]
         }
       },
 
@@ -420,10 +425,10 @@
             "DeleteOnTermination"      : "true",
             "SubnetId"                 : { "Ref" : "PublicSubnet" }
           }],
-          "Tags" : [{
-            "Key": "MinionLabInstanceType",
-            "Value": "opennms"
-          }]
+          "Tags" : [
+            { "Key" : "MinionLabInstanceType", "Value" : "opennms" },
+            { "Key" : "Name", "Value" : "opennms" }
+          ]
         }
       },
 
@@ -442,10 +447,10 @@
             "DeleteOnTermination"      : "true",
             "SubnetId"                 : { "Ref" : "PublicSubnet" }
           }],
-          "Tags" : [{
-            "Key": "MinionLabInstanceType",
-            "Value": "zookeeper"
-          }]
+          "Tags" : [
+            { "Key" : "MinionLabInstanceType", "Value" : "zookeeper" },
+            { "Key" : "Name", "Value" : "zookeeper" }
+          ]
         }
       },
 
